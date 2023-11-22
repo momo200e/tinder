@@ -1,0 +1,174 @@
+definitions:
+  domain.ErrorFormat:
+    properties:
+      code:
+        type: integer
+      message:
+        type: string
+    type: object
+  domain.Gender:
+    enum:
+    - 1
+    - 2
+    type: integer
+    x-enum-varnames:
+    - Male
+    - Female
+  domain.ResponseFormat:
+    properties:
+      code:
+        example: 200
+        type: integer
+      data: {}
+    type: object
+  handler.AddSinglePersonAndMatchRequest:
+    properties:
+      gender:
+        example: 1
+        type: integer
+      height:
+        example: 165
+        type: integer
+      name:
+        example: Jason
+        type: string
+      wanted_dates:
+        example: 10
+        type: integer
+    required:
+    - gender
+    - height
+    - name
+    - wanted_dates
+    type: object
+  handler.SinglePersonAndMatchResponse:
+    properties:
+      users:
+        items:
+          $ref: '#/definitions/handler.SinglePersonAndMatchResponseUser'
+        type: array
+    type: object
+  handler.SinglePersonAndMatchResponseUser:
+    properties:
+      gender:
+        allOf:
+        - $ref: '#/definitions/domain.Gender'
+        example: 1
+      height:
+        example: 165
+        type: integer
+      name:
+        example: Jason
+        type: string
+      remainDates:
+        example: 10
+        type: integer
+    type: object
+host: 0.0.0.0:3002
+info:
+  contact: {}
+  description: |
+    ## Error Code
+
+    - 400: 參數格式有誤
+    - 500: 系統錯誤，請稍後再試
+    - 1001: 用戶已存在
+    - 1002: 用戶不存在
+    - 1003: 剩餘約會次數不足
+  title: Tinder API
+  version: 0.0.1
+paths:
+  /people/{userName}:
+    delete:
+      consumes:
+      - application/json
+      description: 從匹配系統中刪除一個用戶，使該用戶無法再被匹配。
+      parameters:
+      - description: 用戶名(帳號)
+        in: path
+        name: userName
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ok
+          schema:
+            $ref: '#/definitions/domain.ResponseFormat'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorFormat'
+      summary: 刪除用戶
+      tags:
+      - tinder
+  /people/{userName}/query_single_person/{number}:
+    post:
+      consumes:
+      - application/json
+      description: 尋找最多N個可能符合的單身人士，其中N是請求參數。
+      parameters:
+      - description: 用戶名(帳號)
+        in: path
+        name: userName
+        required: true
+        type: string
+      - description: 配對數量
+        in: path
+        name: number
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.ResponseFormat'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.SinglePersonAndMatchResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorFormat'
+      summary: 配對n組
+      tags:
+      - tinder
+  /people/add_and_match:
+    post:
+      consumes:
+      - application/json
+      description: 將新使用者新增至匹配系統並為新使用者尋找任何可能的符合項目。
+      parameters:
+      - description: '<ul><li>gender: 性別 男=1, 女=2</li></ul>'
+        in: body
+        name: Request
+        required: true
+        schema:
+          $ref: '#/definitions/handler.AddSinglePersonAndMatchRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            allOf:
+            - $ref: '#/definitions/domain.ResponseFormat'
+            - properties:
+                data:
+                  $ref: '#/definitions/handler.SinglePersonAndMatchResponse'
+              type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/domain.ErrorFormat'
+      summary: 加入用戶
+      tags:
+      - tinder
+schemes:
+- http
+swagger: "2.0"

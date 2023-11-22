@@ -1,0 +1,259 @@
+{
+    "schemes": [
+        "http"
+    ],
+    "swagger": "2.0",
+    "info": {
+        "description": "## Error Code\n\n- 400: 參數格式有誤\n- 500: 系統錯誤，請稍後再試\n- 1001: 用戶已存在\n- 1002: 用戶不存在\n- 1003: 剩餘約會次數不足\n",
+        "title": "Tinder API",
+        "contact": {},
+        "version": "0.0.1"
+    },
+    "host": "0.0.0.0:3002",
+    "paths": {
+        "/people/add_and_match": {
+            "post": {
+                "description": "將新使用者新增至匹配系統並為新使用者尋找任何可能的符合項目。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tinder"
+                ],
+                "summary": "加入用戶",
+                "parameters": [
+                    {
+                        "description": "\u003cul\u003e\u003cli\u003egender: 性別 男=1, 女=2\u003c/li\u003e\u003c/ul\u003e",
+                        "name": "Request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/handler.AddSinglePersonAndMatchRequest"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/domain.ResponseFormat"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.SinglePersonAndMatchResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorFormat"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/{userName}": {
+            "delete": {
+                "description": "從匹配系統中刪除一個用戶，使該用戶無法再被匹配。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tinder"
+                ],
+                "summary": "刪除用戶",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用戶名(帳號)",
+                        "name": "userName",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "ok",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ResponseFormat"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorFormat"
+                        }
+                    }
+                }
+            }
+        },
+        "/people/{userName}/query_single_person/{number}": {
+            "post": {
+                "description": "尋找最多N個可能符合的單身人士，其中N是請求參數。",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "tinder"
+                ],
+                "summary": "配對n組",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "用戶名(帳號)",
+                        "name": "userName",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "string",
+                        "description": "配對數量",
+                        "name": "number",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "allOf": [
+                                {
+                                    "$ref": "#/definitions/domain.ResponseFormat"
+                                },
+                                {
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/definitions/handler.SinglePersonAndMatchResponse"
+                                        }
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/domain.ErrorFormat"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "domain.ErrorFormat": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer"
+                },
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "domain.Gender": {
+            "type": "integer",
+            "enum": [
+                1,
+                2
+            ],
+            "x-enum-varnames": [
+                "Male",
+                "Female"
+            ]
+        },
+        "domain.ResponseFormat": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "integer",
+                    "example": 200
+                },
+                "data": {}
+            }
+        },
+        "handler.AddSinglePersonAndMatchRequest": {
+            "type": "object",
+            "required": [
+                "gender",
+                "height",
+                "name",
+                "wanted_dates"
+            ],
+            "properties": {
+                "gender": {
+                    "type": "integer",
+                    "example": 1
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 165
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Jason"
+                },
+                "wanted_dates": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        },
+        "handler.SinglePersonAndMatchResponse": {
+            "type": "object",
+            "properties": {
+                "users": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/handler.SinglePersonAndMatchResponseUser"
+                    }
+                }
+            }
+        },
+        "handler.SinglePersonAndMatchResponseUser": {
+            "type": "object",
+            "properties": {
+                "gender": {
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/domain.Gender"
+                        }
+                    ],
+                    "example": 1
+                },
+                "height": {
+                    "type": "integer",
+                    "example": 165
+                },
+                "name": {
+                    "type": "string",
+                    "example": "Jason"
+                },
+                "remainDates": {
+                    "type": "integer",
+                    "example": 10
+                }
+            }
+        }
+    }
+}
