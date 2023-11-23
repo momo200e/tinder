@@ -56,10 +56,6 @@ func (repo *repository) AddUser(user domain.User) {
 		userList = append(userList, repo.Users[user.Name])
 		avlTree.Put(int(user.Height), userList)
 	}
-	// fmt.Println("repo.maleAVL.Keys", repo.maleAVL.Keys)
-	// fmt.Println("repo.maleAVL.Values", repo.maleAVL.Values)
-	// fmt.Println("repo.femaleAVL.Keys", repo.femaleAVL.Keys)
-	// fmt.Println("repo.femaleAVL.Values", repo.femaleAVL.Values)
 }
 
 func (repo *repository) DeleteUserByName(name string) {
@@ -87,27 +83,19 @@ func (repo *repository) DeleteUserByName(name string) {
 		userList := result.([]*domain.User)
 		// 將user從slice中刪除
 		if len(userList) == 1 {
-			fmt.Println("bf avlTree: ", avlTree)
 			avlTree.Remove(int(user.Height))
-			fmt.Println("af avlTree: ", avlTree)
-			fmt.Println("repo.maleAVL: ", repo.maleAVL)
-			fmt.Println("repo.femaleAVL: ", repo.femaleAVL)
 		} else {
 			for i, u := range userList {
 				if u.Name == user.Name {
 					// 高效刪除
-					copy(userList[i:], userList[i+1:])
-
-					// tempUser := userList[len(userList)-1]
-					// userList[len(userList)-1] = userList[i]
-					// userList[i] = tempUser
-					// userList = userList[:len(userList)-1]
+					userList[i] = userList[len(userList)-1]
+					userList = userList[:len(userList)-1]
 					break
 				}
 			}
+			avlTree.Put(int(user.Height), userList)
 		}
 
-		avlTree.Put(int(user.Height), userList)
 		// 將user從map中移除
 		delete(repo.Users, name)
 
@@ -143,10 +131,6 @@ func (repo *repository) UpdateUserRemainDatesDecrByName(name string) (uint8, err
 // 返回:
 //     符合條件的用戶列表。
 func (repo *repository) FindUsersByGenderAndHeight(gender domain.Gender, height uint8, isFindGreater bool, count int) []*domain.User {
-	maleTree := repo.maleAVL
-	femaleTree := repo.femaleAVL
-	fmt.Println("repo.maleAVL", maleTree)
-	fmt.Println("repo.femaleAVL", femaleTree)
 	if count == 0 {
 		// 預設回傳數無限制
 		count = math.MaxInt
@@ -197,6 +181,11 @@ func (repo *repository) FindUsersByGenderAndHeight(gender domain.Gender, height 
 					// 翻轉開始遍歷root另一側
 					reverse = true
 					node = rootNode.Prev()
+					if node == nil {
+						// 全部查完
+						// 結束
+						return matchedUsers
+					}
 				}
 			} else {
 				// 翻轉找另一邊
@@ -211,7 +200,6 @@ func (repo *repository) FindUsersByGenderAndHeight(gender domain.Gender, height 
 			// 找出身高 < height的user
 			if node.Key.(int) < int(height) {
 				users := node.Value.([]*domain.User)
-				fmt.Println("count, len(users)", count, len(users))
 				if count < len(users) {
 					// 結束
 					matchedUsers = append(matchedUsers, users[:count-1]...)
@@ -234,6 +222,11 @@ func (repo *repository) FindUsersByGenderAndHeight(gender domain.Gender, height 
 					// 翻轉開始遍歷root另一側
 					reverse = true
 					node = rootNode.Next()
+					if node == nil {
+						// 全部查完
+						// 結束
+						return matchedUsers
+					}
 				}
 			} else {
 				// 翻轉找另一邊

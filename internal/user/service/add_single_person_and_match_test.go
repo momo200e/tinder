@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"testing"
 	"tinder/domain"
 	"tinder/internal/user/repo"
@@ -41,7 +40,6 @@ func TestAddSinglePersonAndMatch(t *testing.T) {
 	for _, u := range defaultUsers {
 		repo.AddUser(u)
 	}
-	fmt.Println("---------------------mock done------------------------")
 
 	newUser := domain.User{Name: "Lucy", Height: 177, Gender: domain.Female, RemainDates: 5}
 

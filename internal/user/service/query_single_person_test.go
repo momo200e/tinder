@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"testing"
 	"tinder/domain"
 	"tinder/internal/user/repo"
@@ -60,8 +59,6 @@ func TestQuerySinglePerson(t *testing.T) {
 		repo.AddUser(u)
 	}
 
-	fmt.Println("---------------------mock done------------------------")
-
 	matches, errFormat := svc.QuerySinglePerson("Lucy", 2)
 	if errFormat != nil {
 		t.Errorf("Expected err format nil, but got: %v", errFormat)
@@ -83,23 +80,42 @@ func TestQuerySinglePerson(t *testing.T) {
 	}
 
 	userLucy := repo.GetUserByName("Lucy")
-	if userLucy == nil {
-		t.Errorf("Expected user Lucy to be exist, but got %v", userLucy)
-	}
-
 	if userLucy.RemainDates != 3 {
-		t.Errorf("Expected user Lucy remaining dates to be 4, but got %v", userLucy.RemainDates)
+		t.Errorf("Expected user Lucy remaining dates to be 3, but got %v", userLucy.RemainDates)
 	}
 
-	// _, errFormat = svc.QuerySinglePerson("Lucy", 3)
-	// if errFormat != nil {
-	// 	t.Errorf("Expected err format nil for match 3, but got: %v", errFormat)
-	// }
+	matches, errFormat = svc.QuerySinglePerson("Lucy", 3)
+	if errFormat != nil {
+		t.Errorf("Expected err format nil for match 3, but got: %v", errFormat)
+	}
 
-	// userLucy = repo.GetUserByName("Lucy")
-	// if userLucy != nil {
-	// 	t.Errorf("Expected user Lucy to be deleted, but got %v", userLucy)
-	// }
+	if len(matches) != 1 {
+		t.Errorf("Expected 1 user, got %d", len(matches))
+	}
+
+	userLucy = repo.GetUserByName("Lucy")
+	if userLucy.RemainDates != 2 {
+		t.Errorf("Expected user Lucy remaining dates to be 2, but got %v", userLucy.RemainDates)
+	}
+
+	_, errFormat = svc.QuerySinglePerson("Lucy", 1)
+	if errFormat != nil {
+		t.Errorf("Expected err format nil, but got: %v", errFormat)
+	}
+	_, errFormat = svc.QuerySinglePerson("Lucy", 1)
+	if errFormat != nil {
+		t.Errorf("Expected err format nil, but got: %v", errFormat)
+	}
+
+	userLucy = repo.GetUserByName("Lucy")
+	if userLucy != nil {
+		t.Errorf("Expected user Lucy to be deleted, but got %v", userLucy)
+	}
+
+	_, errFormat = svc.QuerySinglePerson("Lucy", 1)
+	if errFormat == nil {
+		t.Errorf("Expected err format not nil, but got: nil")
+	}
 
 	matches2, errFormat := svc.QuerySinglePerson("Ken", 2)
 	if errFormat != nil {
@@ -108,7 +124,6 @@ func TestQuerySinglePerson(t *testing.T) {
 
 	if len(matches2) != 2 {
 		t.Errorf("Expected 2 user, got %d", len(matches2))
-		fmt.Println("matches2", matches2[0])
 	}
 
 	for _, u := range matches2 {
@@ -122,8 +137,8 @@ func TestQuerySinglePerson(t *testing.T) {
 		t.Errorf("Expected err format nil for match 3, but got: %v", errFormat)
 	}
 
-	if len(matches3) != 3 {
-		t.Errorf("Expected 3 user, got %d", len(matches3))
+	if len(matches3) != 2 {
+		t.Errorf("Expected 2 user, got %d", len(matches3))
 	}
 
 }

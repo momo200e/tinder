@@ -30,7 +30,7 @@ func RemoveSinglePerson(c *gin.Context) {
 	errFormat := svc.RemoveSinglePerson(userName)
 	if errFormat != nil {
 		log.Println("RemoveSinglePerson error: ", errFormat.Message)
-		Failed(c, domain.ErrorServer, errFormat.Message)
+		Failed(c, *errFormat, "")
 		return
 	}
 

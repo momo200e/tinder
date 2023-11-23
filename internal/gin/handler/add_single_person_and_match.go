@@ -58,7 +58,7 @@ func AddSinglePersonAndMatch(c *gin.Context) {
 	matches, errFormat := svc.AddSinglePersonAndMatch(&newUser)
 	if errFormat != nil {
 		log.Println("AddSinglePersonAndMatch error: ", errFormat.Message)
-		Failed(c, domain.ErrorServer, errFormat.Message)
+		Failed(c, *errFormat, "")
 		return
 	}
 

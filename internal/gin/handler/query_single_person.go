@@ -40,7 +40,7 @@ func QuerySinglePerson(c *gin.Context) {
 	matches, errFormat := svc.QuerySinglePerson(userName, int(n))
 	if errFormat != nil {
 		log.Println("QuerySinglePerson error: ", errFormat.Message)
-		Failed(c, domain.ErrorServer, errFormat.Message)
+		Failed(c, *errFormat, "")
 		return
 	}
 

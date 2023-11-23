@@ -19,7 +19,7 @@ func SetupRouter() *gin.Engine {
 	{
 		api.POST("/add_and_match", handler.AddSinglePersonAndMatch)
 		api.DELETE("/:userName", handler.RemoveSinglePerson)
-		api.GET("/:userName/query_single_person/:number", handler.QuerySinglePerson)
+		api.POST("/:userName/query_single_person/:number", handler.QuerySinglePerson)
 	}
 
 	return r

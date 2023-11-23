@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"sync"
 	"tinder/domain"
 )
@@ -29,7 +28,6 @@ func (svc *service) AddSinglePersonAndMatch(newUser *domain.User) ([]*domain.Use
 func (svc *service) QuerySinglePerson(userName string, number int) ([]*domain.User, *domain.ErrorFormat) {
 	serviceLock.Lock()
 	defer serviceLock.Unlock()
-	fmt.Println("進來了QuerySinglePerson", userName, number)
 	user := svc.repo.GetUserByName(userName)
 	if user == nil {
 		return nil, &domain.ErrUserNotFound
@@ -48,11 +46,8 @@ func (svc *service) QuerySinglePerson(userName string, number int) ([]*domain.Us
 		findGender = domain.Male
 	}
 	isFindGreater := user.Gender == domain.Female
-	fmt.Printf("findGender: %v, user.Height: %v, isFindGreater: %v, number: %v \n", findGender, user.Height, isFindGreater, number)
 	matches := svc.repo.FindUsersByGenderAndHeight(findGender, user.Height, isFindGreater, number)
-	fmt.Printf("matches: %+v \n", matches)
 	for _, match := range matches {
-		fmt.Printf("match: %+v \n", match)
 		// 目前寫法不會並發，所以不會噴error
 		userRemainDates, _, domainErr := svc.matchDating(user.Name, match.Name)
 		if domainErr != nil {
@@ -83,8 +78,6 @@ func (svc *service) matchDating(userAName, userBName string) (uint8, uint8, *dom
 	matchLock.Lock()
 	defer matchLock.Unlock()
 
-	fmt.Println("userAName", userAName)
-	fmt.Println("userBName", userBName)
 	// 約會次數扣1
 	userARemainDates, err := svc.repo.UpdateUserRemainDatesDecrByName(userAName)
 	if err != nil {
@@ -103,9 +96,5 @@ func (svc *service) matchDating(userAName, userBName string) (uint8, uint8, *dom
 		svc.repo.DeleteUserByName(userBName)
 	}
 
-	fmt.Println("userAName", userAName)
-	fmt.Println("userARemainDates", userARemainDates)
-	fmt.Println("userBName", userBName)
-	fmt.Println("userBRemainDates", userBRemainDates)
 	return userARemainDates, userBRemainDates, nil
 }
